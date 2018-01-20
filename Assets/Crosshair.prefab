@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 114728642249009270}
   - component: {fileID: 114538458984522650}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: Crosshair
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
