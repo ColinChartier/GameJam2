@@ -47,10 +47,17 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public bool line1_attached;
         public  bool line2_attached;
         private bool flinging;
-        private Vector3 launch_dir;
-        private Vector3 coord1;
-        private Vector3 coord2;
-        private Transform rb;
+        private Vector3 launch_dir; //(coord 1 + coord 2)
+        private Vector3 coord1; //result of left raycast
+        private Vector3 coord2; //result of right raycast
+        private Transform m_Transform; //where we are
+
+        // Ropes
+        public Component leftHand;
+        public Component rightHand;
+        private LineRenderer leftTentacle;
+        private LineRenderer rightTentacle;
+
 
         // Use this for initialization
         private void Start()
@@ -65,7 +72,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
-            rb = GetComponent<Transform>();
+            m_Transform = GetComponent<Transform>();
+
+            leftTentacle = leftHand.GetComponent<LineRenderer>();
+            rightTentacle = rightHand.GetComponent<LineRenderer>();
+            leftTentacle.enabled = false;
+            rightTentacle.enabled = false;
         }
 
 
@@ -139,7 +151,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     }
                 }
             }
-            
+            DisplayRope();
         }
 
         private bool SendLine(out Vector3 coord)
@@ -160,8 +172,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private void LaunchPlayer()
         {
             Debug.Log("Launch");
-            Vector3 to_line1 = coord1 - rb.position;
-            Vector3 to_line2 = coord2 - rb.position;
+            Vector3 to_line1 = coord1 - m_Transform.position;
+            Vector3 to_line2 = coord2 - m_Transform.position;
             launch_dir = to_line1 + to_line2;
             flinging = true;
             line1_attached = false;
@@ -350,6 +362,24 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 return;
             }
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
+        }
+
+        private void DisplayRope()
+        {
+            leftTentacle.enabled = line1_attached;
+            rightTentacle.enabled = line2_attached;
+            if(line1_attached)
+            {
+                leftTentacle.positionCount = 2;
+                leftTentacle.SetPosition(0, leftHand.transform.position);
+                leftTentacle.SetPosition(1, coord1);
+            }
+            if (line2_attached)
+            {
+                rightTentacle.positionCount = 2;
+                rightTentacle.SetPosition(0, rightHand.transform.position);
+                rightTentacle.SetPosition(1, coord2);
+            }
         }
     }
 }
