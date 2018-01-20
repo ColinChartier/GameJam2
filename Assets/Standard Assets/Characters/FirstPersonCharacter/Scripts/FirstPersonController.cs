@@ -145,7 +145,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool SendLine(out Vector3 coord)
         {
             RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2)), out hit, 10000))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2)), out hit, 100))
             {
                 Debug.Log("Line attached");
                 coord = hit.point;
@@ -195,8 +195,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 m_MoveDir.z = desiredMove.z * speed;
             } else
             {
-                m_MoveDir.x += desiredMove.x * speed / 8;
-                m_MoveDir.z += desiredMove.z * speed / 8;
+                m_MoveDir.x += desiredMove.x * speed / 20;
+                m_MoveDir.z += desiredMove.z * speed / 20;
             }
 
             if (flinging)
