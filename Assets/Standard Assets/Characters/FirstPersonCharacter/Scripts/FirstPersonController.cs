@@ -152,6 +152,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 }
             }
             DisplayRope();
+            if (line1_attached || line2_attached)
+            {
+                Time.timeScale = 0.25f;
+            } else
+            {
+                Time.timeScale = 1f;
+            }
         }
 
         private bool SendLine(out Vector3 coord)
@@ -213,7 +220,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             if (flinging)
             {
+                if (launch_dir.magnitude > 60)
+                {
+                    launch_dir = launch_dir * (60 / launch_dir.magnitude);
+                }
                 m_MoveDir = launch_dir;
+                Debug.Log("Magnitude = " + launch_dir.magnitude.ToString());
                 flinging = false;
                 m_Jumping = true;
             }
