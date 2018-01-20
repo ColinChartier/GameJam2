@@ -220,9 +220,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             if (flinging)
             {
-                if (launch_dir.magnitude > 60)
+                if (launch_dir.magnitude > 90)
                 {
-                    launch_dir = launch_dir * (60 / launch_dir.magnitude);
+                    launch_dir = launch_dir * (90 / launch_dir.magnitude);
                 }
                 m_MoveDir = launch_dir;
                 Debug.Log("Magnitude = " + launch_dir.magnitude.ToString());
