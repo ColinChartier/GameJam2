@@ -4,4 +4,10 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/UI/menu.unity
+    guid: 58f09c9d34b894b4c90334dc8f04538b
+  - enabled: 1
+    path: Assets/slingshot.unity
+    guid: b7e4a5dc456d4b94db78f24ce12e459c
