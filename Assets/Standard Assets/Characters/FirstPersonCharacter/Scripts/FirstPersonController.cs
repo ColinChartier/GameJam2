@@ -44,6 +44,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 
         // Slingshot fModifications
+        private bool line1_attached;
+        private bool line2_attached;
         private Vector3 coord1;
         private Vector3 coord2;
 
@@ -88,16 +90,63 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_PreviouslyGrounded = m_CharacterController.isGrounded;
 
             // Slingshot Modifications
+            // Left click
+            if (CrossPlatformInputManager.GetButtonDown("Fire1"))
+            {
+                if (!line1_attached)
+                {
+                    SendLine(out coord1, line1_attached);
+                }
+            }
+            if (CrossPlatformInputManager.GetButtonUp("Fire1"))
+            {
+                if (!line2_attached)
+                {
+                    line1_attached = false;
+                } else
+                {
+                    LaunchPlayer();
+                }
+            }
+            // Right click
+            if (CrossPlatformInputManager.GetButtonDown("Fire2"))
+            {
+                if (!line2_attached)
+                {
+                    SendLine(out coord2, line2_attached);
+                }
+            }
+            if (CrossPlatformInputManager.GetButtonUp("Fire2"))
+            {
+                if (!line1_attached)
+                {
+                    line2_attached = false;
+                }
+                else
+                {
+                    LaunchPlayer();
+                }
+            }
         }
 
-        private void SendLine(Vector3 coord)
+        private void SendLine(out Vector3 coord, bool line)
         {
             RaycastHit hit;
-            Physics.Raycast(Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2)), out hit, 100);
-
-            coord = hit.point;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2)), out hit, 100))
+            {
+                coord = hit.point;
+                line = true;
+            } else
+            {
+                coord = new Vector3(0, 0, 0);
+            }
         }
 
+        private void LaunchPlayer()
+        {
+            Vector2 launchdir = coord1 + coord2;
+            
+        }
 
         private void PlayLandingSound()
         {
