@@ -44,10 +44,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 
         // Slingshot fModifications
-        private bool line1_attached;
-        private bool line2_attached;
+        public bool line1_attached;
+        public  bool line2_attached;
+        private bool flinging;
+        private Vector3 launch_dir;
         private Vector3 coord1;
         private Vector3 coord2;
+        private Transform rb;
 
         // Use this for initialization
         private void Start()
@@ -62,6 +65,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
+            rb = GetComponent<Transform>();
         }
 
 
@@ -91,61 +95,77 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             // Slingshot Modifications
             // Left click
-            if (CrossPlatformInputManager.GetButtonDown("Fire1"))
+            if (!line1_attached)
             {
-                if (!line1_attached)
+                if (CrossPlatformInputManager.GetButtonDown("Fire1"))
                 {
-                    SendLine(out coord1, line1_attached);
+                    line1_attached = SendLine(out coord1);
+                    Debug.Log("Send line 1");
                 }
-            }
-            if (CrossPlatformInputManager.GetButtonUp("Fire1"))
-            {
-                if (!line2_attached)
+            } else {
+                if (CrossPlatformInputManager.GetButtonUp("Fire1"))
                 {
-                    line1_attached = false;
-                } else
-                {
-                    LaunchPlayer();
+                    if (!line2_attached)
+                    {
+                        line1_attached = false;
+                        Debug.Log("Detach line 1");
+                    }
+                    else
+                    {
+                        LaunchPlayer();
+                    }
                 }
             }
             // Right click
-            if (CrossPlatformInputManager.GetButtonDown("Fire2"))
+            if (!line2_attached)
             {
-                if (!line2_attached)
+                if (CrossPlatformInputManager.GetButtonDown("Fire2"))
                 {
-                    SendLine(out coord2, line2_attached);
+                    line2_attached = SendLine(out coord2);
+                    Debug.Log("Send line 2");
+                }
+            } else
+            {
+                if (CrossPlatformInputManager.GetButtonUp("Fire2"))
+                {
+                    if (!line1_attached)
+                    {
+                        line2_attached = false;
+                        Debug.Log("Detach line 2");
+                    }
+                    else
+                    {
+                        LaunchPlayer();
+                    }
                 }
             }
-            if (CrossPlatformInputManager.GetButtonUp("Fire2"))
-            {
-                if (!line1_attached)
-                {
-                    line2_attached = false;
-                }
-                else
-                {
-                    LaunchPlayer();
-                }
-            }
+            
         }
 
-        private void SendLine(out Vector3 coord, bool line)
+        private bool SendLine(out Vector3 coord)
         {
             RaycastHit hit;
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2)), out hit, 100))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(new Vector2(Screen.width / 2, Screen.height / 2)), out hit, 10000))
             {
+                Debug.Log("Line attached");
                 coord = hit.point;
-                line = true;
+                return true;
             } else
             {
                 coord = new Vector3(0, 0, 0);
+                return false;
             }
         }
 
         private void LaunchPlayer()
         {
-            Vector2 launchdir = coord1 + coord2;
-            
+            Debug.Log("Launch");
+            Vector3 to_line1 = coord1 - rb.position;
+            Vector3 to_line2 = coord2 - rb.position;
+            launch_dir = to_line1 + to_line2;
+            flinging = true;
+            line1_attached = false;
+            line2_attached = false;
         }
 
         private void PlayLandingSound()
@@ -169,11 +189,23 @@ namespace UnityStandardAssets.Characters.FirstPerson
                                m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
-            m_MoveDir.x = desiredMove.x*speed;
-            m_MoveDir.z = desiredMove.z*speed;
+            if (!m_Jumping)
+            {
+                m_MoveDir.x = desiredMove.x * speed;
+                m_MoveDir.z = desiredMove.z * speed;
+            } else
+            {
+                m_MoveDir.x += desiredMove.x * speed / 8;
+                m_MoveDir.z += desiredMove.z * speed / 8;
+            }
 
-
-            if (m_CharacterController.isGrounded)
+            if (flinging)
+            {
+                m_MoveDir = launch_dir;
+                flinging = false;
+                m_Jumping = true;
+            }
+            else if (m_CharacterController.isGrounded)
             {
                 m_MoveDir.y = -m_StickToGroundForce;
 
